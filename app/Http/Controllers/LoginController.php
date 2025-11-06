@@ -49,7 +49,7 @@ class LoginController extends Controller
             'nama'      => $request->nama,
             'alamat'    => $request->alamat,
             'nomor_hp'  => $request->nomor_hp,
-            'password'  => Hash::make($request->password),
+            'password_hash'  => Hash::make($request->password),
             'role_id'   => $request->role_id,
         ];
 
@@ -83,9 +83,10 @@ class LoginController extends Controller
         // ambil user pertama
         $userSnapshot = $query->rows()[0];
         $userData     = $userSnapshot->data();
+        // dd($userData);
 
         // validasi password
-        if (!Hash::check($request->password, $userData['password'])) {
+        if (!Hash::check($request->password, $userData['password_hash'])) {
             return response()->json(['success' => false, 'message' => 'Password salah'], 401);
         }
 
@@ -94,6 +95,8 @@ class LoginController extends Controller
                 'sub'     => (string) $userData['user_id'],
                 'user_id' => $userData['user_id'],
                 'nama'    => $userData['nama'],
+                'alamat'    => $userData['alamat'],
+                'nomor_hp'    => $userData['nomor_hp'],
                 'role_id' => $userData['role_id'],
                 'iat'     => time(),
                 'exp'     => time() + 3600,
@@ -105,7 +108,8 @@ class LoginController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membuat token',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
+                // 'data' => $userData
             ], 500);
         }
 

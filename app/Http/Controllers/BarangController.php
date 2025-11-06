@@ -35,7 +35,7 @@ class BarangController extends Controller
 
         return response()->json($barang);
     }
-    
+
 
     // POST /api/barang
     public function store(Request $request)
@@ -45,33 +45,45 @@ class BarangController extends Controller
             'harga_barang'  => 'required|numeric',
             'stok_barang'   => 'required|integer',
             'kategori_id'   => 'required|string',
+            'gambar_barang' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        // Generate barang_id random (misalnya B + 6 digit angka random)
+        // Generate ID unik
         $barang_id = 'B' . mt_rand(100000, 999999);
 
+        // Simpan file gambar jika ada
+        $gambarUrl = null;
+        if ($request->hasFile('gambar_barang')) {
+            $path = $request->file('gambar_barang')->store('barang', 'public');
+            $gambarUrl = asset('storage/' . $path);
+        }
+
+        // Data barang
         $data = [
             'barang_id'    => $barang_id,
             'nama_barang'  => $request->nama_barang,
             'harga_barang' => (int) $request->harga_barang,
             'stok_barang'  => (int) $request->stok_barang,
             'kategori_id'  => $request->kategori_id,
+            'gambar_barang' => $gambarUrl,
         ];
 
-        $docRef = $this->firestore->collection($this->collection)
-            ->document($barang_id);
-
-        $docRef->set($data);
+        // Simpan ke Firestore
+        $this->firestore->collection($this->collection)
+            ->document($barang_id)
+            ->set($data);
 
         return response()->json([
             'success' => true,
-            'data'    => $data
+            'message' => 'Barang berhasil ditambahkan',
+            'data'    => $data,
         ], 201);
     }
+
 
 
 
