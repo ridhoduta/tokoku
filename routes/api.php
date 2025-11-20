@@ -19,6 +19,7 @@ Route::middleware(['jwt.verify:R001,R002'])->group(function () {
     Route::apiResource('kategori', KategoriController::class)->only(['index', 'show']);
     Route::apiResource('pesanan', PesananController::class)->only(['index', 'show']);
     Route::post('/pesanan/bayar', [PesananController::class, 'bayar']);
+    Route::get('/barang/kategori/{kategori_id}', [BarangController::class, 'getByKategori']);
 
 });
 
@@ -27,6 +28,7 @@ Route::middleware(['jwt.verify:R001'])->group(function () {
     Route::apiResource('barang', BarangController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('kategori', KategoriController::class)->only(['store', 'update', 'destroy']);
     Route::put('/pesanan/{id}', [PesananController::class, 'update']);
+    Route::get('/laporan', [PesananController::class, 'getLaporan']);
 });
 // 🔹 User (R002): bisa lihat, tambah, dan hapus pesanan miliknya
 Route::middleware(['jwt.verify:R002'])->group(function () {

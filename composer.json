@@ -9,7 +9,7 @@
         "php": "^8.2",
         "google/apiclient": "2.18.4",
         "google/auth": "^1.48",
-        "google/cloud-firestore": "1.30",
+        "google/cloud-firestore": "^1.30",
         "guzzlehttp/guzzle": "^7.10",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
