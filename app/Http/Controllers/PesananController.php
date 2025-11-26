@@ -64,6 +64,7 @@ class PesananController extends Controller
     {
         $payload = JWTAuth::parseToken()->getPayload();
         $role_id = $payload->get('role_id');
+        $usId = $payload->get('user_id');
         $nama_pemesan = $payload->get('nama');
 
         if ($role_id !== 'R002') {
@@ -170,7 +171,7 @@ class PesananController extends Controller
             'pembayaran' => $request->pembayaran,
             'status_pembayaran' => 'belum dibayar',
             'tanggal' => Carbon::now()->format('d-m-Y'),
-            'uid' => $id,
+            'uid' => $usId,
         ];
 
         $this->firestore->collection('pesanan')->document($id)->set($data);
@@ -213,6 +214,7 @@ class PesananController extends Controller
     {
         $payload = JWTAuth::parseToken()->getPayload();
         $role_id = $payload->get('role_id');
+        $userId = $payload->get('user_id');
         // $noHp = $payload->get('nomor_hp');
 
         if ($role_id !== 'R001') {
@@ -302,7 +304,7 @@ class PesananController extends Controller
                         "Pesanan dengan ID *{$id}* telah *selesai diproses*.\n\n".
                         "📦 *Detail Pesanan:*\n".
                         collect($data['barang_dipesan'])->map(function ($item) {
-                            return "- {$item['nama_barang']} ({$item['qty']} x Rp".number_format($item['harga_barang'], 0, ',', '.').')';
+                            return "- {$item['nama_barang']} ({$item['qty']} {$item['satuan_dipilih']} x Rp".number_format($item['harga_final'], 0, ',', '.').')';
                         })->implode("\n").
                         "\n\n💰 *Total: Rp".number_format($data['total_harga'], 0, ',', '.')."*\n".
                         'Terima kasih telah berbelanja bersama kami 🙏';
@@ -512,4 +514,45 @@ class PesananController extends Controller
 
         return 0;
     }
+
+    public function updatePengiriman(Request $request, $id)
+    {
+        // Ambil payload JWT
+        $payload = JWTAuth::parseToken()->getPayload();
+        $role_id = $payload->get('role_id');
+
+        // Hanya admin (R001) yang bisa update pengiriman
+        if ($role_id !== 'R001') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya admin yang bisa mengubah pengiriman',
+            ], 403);
+        }
+
+        // Validasi request
+        $request->validate([
+            'pengiriman' => 'required|string',
+        ]);
+
+        // Ambil dokumen pesanan dari Firestore
+        $docRef = $this->firestore->collection('pesanan')->document($id);
+        $snapshot = $docRef->snapshot();
+
+        if (! $snapshot->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan',
+            ], 404);
+        }
+
+        // Update field pengiriman di Firestore
+        $docRef->update([['path' => 'pengiriman', 'value' => $request->pengiriman]]);
+
+        // Return response sukses
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengiriman pesanan berhasil diperbarui',
+        ]);
+    }
+
 }
