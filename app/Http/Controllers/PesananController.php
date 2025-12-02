@@ -126,9 +126,9 @@ class PesananController extends Controller
 
                 if ($satuan === 'kg') {
                     $gramDipakai = $item['qty'] * 1000;
-                } elseif ($satuan === '500g') {
+                } elseif ($satuan === '500gr') {
                     $gramDipakai = 500 * $item['qty'];
-                } elseif ($satuan === '250g') {
+                } elseif ($satuan === '250gr') {
                     $gramDipakai = 250 * $item['qty'];
                 }
 
