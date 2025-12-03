@@ -2,9 +2,7 @@
 use Illuminate\Support\Facades\Route;
 
 // Auto redirect pertama kali ke /login (React)
-Route::get('/', function () {
-    return redirect('/login');
-});
+
 
 // Catch-all route untuk React SPA
 Route::get('/{any}', function () {
