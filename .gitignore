@@ -17,3 +17,4 @@ yarn-error.log
 .phpunit.cache/*
 /public/build
 /.fleet
+/storage/service-account.json
