@@ -35,6 +35,7 @@ Route::middleware(['jwt.verify:R001'])->group(function () {
 Route::middleware(['jwt.verify:R002'])->group(function () {
     Route::post('/pesanan', [PesananController::class, 'store']);
     Route::delete('/pesanan/{id}', [PesananController::class, 'destroy']);
+    Route::put('/pesanan/batal/{id}', [PesananController::class, 'cancel']);
 });
 
 

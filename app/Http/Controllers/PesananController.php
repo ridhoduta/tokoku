@@ -357,6 +357,37 @@ class PesananController extends Controller
         return response()->json(['success' => true, 'message' => 'Pesanan berhasil dihapus']);
     }
 
+    public function cancel($id)
+    {
+        $payload = JWTAuth::parseToken()->getPayload();
+        $role_id = $payload->get('role_id');
+        $nama_pemesan = $payload->get('nama');
+
+        $docRef = $this->firestore->collection('pesanan')->document($id);
+        $snapshot = $docRef->snapshot();
+
+        if (! $snapshot->exists()) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        $data = $snapshot->data();
+
+        // Jika role R002 (user), hanya boleh membatalkan pesanan miliknya
+        if ($role_id === 'R002' && $data['nama_pemesan'] !== $nama_pemesan) {
+            return response()->json(['success' => false, 'message' => 'Tidak bisa membatalkan pesanan orang lain'], 403);
+        }
+
+        // Update status menjadi dibatalkan
+        $docRef->update([
+            ['path' => 'status', 'value' => 'dibatalkan'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status pesanan berhasil diperbarui menjadi dibatalkan',
+        ]);
+    }
+
     /**
      * 🔹 BAYAR — Proses pembayaran menggunakan Midtrans Sandbox
      */
@@ -554,5 +585,4 @@ class PesananController extends Controller
             'message' => 'Pengiriman pesanan berhasil diperbarui',
         ]);
     }
-
 }
